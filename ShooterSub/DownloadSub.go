@@ -32,7 +32,7 @@ func downloadSub(fullpath string, language string) {
 
 	for i, _ := range subInfo {
 		for _, info := range subInfo[i].Files {
-			subfile := generateSubFileName(fullpath, i, info.Ext)
+			subfile := generateSubFileName(fullpath, i, info.Ext, language)
 			downloadSubData(subfile, info.Link, subInfo[i].Delay)
 		}
 	}
@@ -63,13 +63,13 @@ func downloadSubData(subfile string, link string, delay int32) {
 	return
 }
 
-func generateSubFileName(fullpath string, index int, ext string) string {
+func generateSubFileName(fullpath string, index int, ext string, lang string) string {
 	basename := fullpath[:strings.LastIndex(fullpath, ".")]
 	var subfile string
 	if index == 0 {
-		subfile = fmt.Sprintf("%s.%s.%s", basename, "chn", ext)
+		subfile = fmt.Sprintf("%s.%s.%s", basename, lang, ext)
 	} else {
-		subfile = fmt.Sprintf("%s.%s%d.%s", basename, "chn", index, ext)
+		subfile = fmt.Sprintf("%s.%s%d.%s", basename, lang, index, ext)
 	}
 	return subfile
 }
