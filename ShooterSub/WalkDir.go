@@ -1,8 +1,10 @@
 package main
 
 import (
+	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/deckarep/golang-set"
 )
@@ -60,8 +62,26 @@ func isVideoFile(p string) bool {
 }
 
 func isExistsSub(p string, lang string) bool {
+	filenameOnly := strings.TrimSuffix(filepath.Base(p), filepath.Ext(p))
+	subfile := fmt.Sprintf("%s.%s*", filenameOnly, lang)
+	matchs, _ := filepath.Glob(filepath.Join(filepath.Dir(p), subfile))
+	if len(matchs) > 0 {
+		return true
+	}
 
-	//basename := p[:strings.LastIndex(p, ".")]
+	// logger.Info("SubFile:", subfile)
+	// dir := filepath.Dir(p)
+	// fileinfos, err := ioutil.ReadDir(dir)
+	// if err != nil {
+	// 	logger.Error(err)
+	// }
+	// for _, fileinfo := range fileinfos {
+	// 	if fileinfo.IsDir() {
+	// 		continue
+	// 	}
+	// 	//logger.Info(fileinfo.Name())
+	// }
+	// //basename := p[:strings.LastIndex(p, ".")]
 
 	return false
 }
