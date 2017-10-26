@@ -66,6 +66,7 @@ func isExistsSub(p string, lang string) bool {
 	subfile := fmt.Sprintf("%s.%s*", filenameOnly, lang)
 	matchs, _ := filepath.Glob(filepath.Join(filepath.Dir(p), subfile))
 	if len(matchs) > 0 {
+		logger.Info("存在字幕文件：" + p)
 		return true
 	}
 
@@ -96,7 +97,8 @@ func walkDir(filePath string, lang string) {
 			return nil
 		}
 
-		downloadSub(path, lang)
+		logger.Info("VideoFile:", path)
+		//downloadSub(path, lang)
 		return nil
 	})
 

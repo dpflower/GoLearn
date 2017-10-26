@@ -12,3 +12,12 @@ func TestIsExistsSub(t *testing.T) {
 	t.Logf("")
 
 }
+
+func TestWalkDir(t *testing.T) {
+	fileName := "E:\\DP"
+	lang := "chn"
+	walkDir(fileName, lang)
+
+	t.Logf("")
+
+}
