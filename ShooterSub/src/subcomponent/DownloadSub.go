@@ -1,4 +1,4 @@
-package main
+package subcomponent
 
 import (
 	"bytes"
@@ -24,15 +24,15 @@ type SubInfo struct {
 	Files []FileInfo // 包含文件信息的Array。 注：一个字幕可能会包含多个字幕文件，例如：idx+sub格式
 }
 
-func downloadSub(fullpath string, language string) {
-	subInfo, err := fetchSubInfo(fullpath, language)
+func DownloadSub(p string, language string) {
+	subInfo, err := fetchSubInfo(p, language)
 	if err != nil {
 		logger.Error(err)
 	}
 
 	for i, _ := range subInfo {
 		for _, info := range subInfo[i].Files {
-			subfile := generateSubFileName(fullpath, i, info.Ext, language)
+			subfile := generateSubFileName(p, i, info.Ext, language)
 			downloadSubData(subfile, info.Link, subInfo[i].Delay)
 		}
 	}
@@ -63,8 +63,8 @@ func downloadSubData(subfile string, link string, delay int32) {
 	return
 }
 
-func generateSubFileName(fullpath string, index int, ext string, lang string) string {
-	basename := fullpath[:strings.LastIndex(fullpath, ".")]
+func generateSubFileName(p string, index int, ext string, lang string) string {
+	basename := p[:strings.LastIndex(p, ".")]
 	var subfile string
 	if index == 0 {
 		subfile = fmt.Sprintf("%s.%s.%s", basename, lang, ext)
@@ -74,20 +74,20 @@ func generateSubFileName(fullpath string, index int, ext string, lang string) st
 	return subfile
 }
 
-func fetchSubInfo(fullpath string, language string) ([]SubInfo, error) {
+func fetchSubInfo(p string, language string) ([]SubInfo, error) {
 
-	logger.Notice("Start searching subtitles for " + path.Base(fullpath))
+	logger.Notice("Start searching subtitles for " + path.Base(p))
 	Url, err := url.Parse("https://www.shooter.cn/api/subapi.php")
 
 	if err != nil {
 		logger.Error(err)
 	}
 
-	hash := computeFileHash(fullpath)
+	hash := computeFileHash(p)
 
 	parameters := url.Values{}
 	parameters.Add("filehash", hash)
-	parameters.Add("pathinfo", fullpath)
+	parameters.Add("pathinfo", p)
 	parameters.Add("format", "json")
 	parameters.Add("lang", language)
 	Url.RawQuery = parameters.Encode()

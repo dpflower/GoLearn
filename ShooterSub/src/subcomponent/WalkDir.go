@@ -1,4 +1,4 @@
-package main
+package subcomponent
 
 import (
 	"fmt"
@@ -7,6 +7,11 @@ import (
 	"strings"
 
 	"github.com/deckarep/golang-set"
+	"github.com/op/go-logging"
+)
+
+var (
+	logger = logging.MustGetLogger("submon")
 )
 
 var videoFormats = []interface{}{
@@ -87,7 +92,7 @@ func isExistsSub(p string, lang string) bool {
 	return false
 }
 
-func walkDir(filePath string, lang string) {
+func WalkDir(filePath string, lang string) {
 	err := filepath.Walk(filePath, func(path string, f os.FileInfo, err error) error {
 		//logger.Infof("%s", filePath)
 		if !isVideoFile(path) {

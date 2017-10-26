@@ -1,4 +1,4 @@
-package main
+package subcomponent
 
 import (
 	"crypto/md5"
@@ -40,7 +40,7 @@ func computeFileHash(filePath string) string {
 	return hash
 }
 
-func getfilehash(fullpath string) string {
+func Getfilehash(fullpath string) string {
 	fp, err := os.Open(fullpath)
 	if err != nil {
 		logger.Error(err)
