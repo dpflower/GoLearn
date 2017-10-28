@@ -30,6 +30,15 @@ func DownloadSub(p string, language string) {
 		logger.Error(err)
 	}
 
+	if len(subInfo) == 0{
+		subfile := generateSubFileName(p, 0, "notfind", language)
+		out, os_err := os.Create(subfile)
+		if os_err != nil {
+			logger.Error(os_err)
+		}
+		defer out.Close()
+	}
+
 	for i, _ := range subInfo {
 		for _, info := range subInfo[i].Files {
 			subfile := generateSubFileName(p, i, info.Ext, language)

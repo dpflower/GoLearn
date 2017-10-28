@@ -10,8 +10,12 @@ import (
 	"github.com/op/go-logging"
 )
 
+
 var (
 	logger = logging.MustGetLogger("submon")
+	format = logging.MustStringFormatter(
+		`%{color}%{time:15:04:05.000} %{shortfunc} > %{level:.4s} %{id:03x}%{color:reset} %{message}`,
+	)
 )
 
 var videoFormats = []interface{}{
@@ -61,33 +65,45 @@ var videoFormats = []interface{}{
 
 var videoFormatsSet = mapset.NewSetFromSlice(videoFormats)
 
+var subFormats = []interface{}{
+	".srt",
+	".ass",
+	".sub",
+	".idx",
+	".ssa",
+	".smi",
+}
+
+var pathSep = string(os.PathSeparator)
+
 func isVideoFile(p string) bool {
 	ext := filepath.Ext(p)
 	return videoFormatsSet.Contains(ext)
 }
 
 func isExistsSub(p string, lang string) bool {
+	filedir := filepath.Dir(p)
 	filenameOnly := strings.TrimSuffix(filepath.Base(p), filepath.Ext(p))
-	subfile := fmt.Sprintf("%s.%s*", filenameOnly, lang)
-	matchs, _ := filepath.Glob(filepath.Join(filepath.Dir(p), subfile))
-	if len(matchs) > 0 {
-		logger.Info("存在字幕文件：" + p)
+
+	for _, subExt := range subFormats{
+		subfile := fmt.Sprintf("%s%s%s.%s%s", filedir, pathSep, filenameOnly, lang, subExt)
+		//fmt.Println("subfile:"+subfile)
+		_, err :=os.Stat(subfile)
+		if err == nil{
+			logger.Info("存在字幕文件：" + p)
+			return true
+		}
+	}
+
+
+	subfile := fmt.Sprintf("%s%s%s.%s%s", filedir, pathSep, filenameOnly, lang, ".notfind")
+	fi, err :=os.Stat(subfile)
+	if err == nil{
+		modTime := fi.ModTime()
+		logger.Info(fmt.Sprintf("存在字幕不存在文件：%s 创建时间：", subfile, modTime.Format("2006-01-02 15:04:05")))
 		return true
 	}
 
-	// logger.Info("SubFile:", subfile)
-	// dir := filepath.Dir(p)
-	// fileinfos, err := ioutil.ReadDir(dir)
-	// if err != nil {
-	// 	logger.Error(err)
-	// }
-	// for _, fileinfo := range fileinfos {
-	// 	if fileinfo.IsDir() {
-	// 		continue
-	// 	}
-	// 	//logger.Info(fileinfo.Name())
-	// }
-	// //basename := p[:strings.LastIndex(p, ".")]
 
 	return false
 }
@@ -103,7 +119,7 @@ func WalkDir(filePath string, lang string) {
 		}
 
 		logger.Info("VideoFile:", path)
-		//downloadSub(path, lang)
+		DownloadSub(path, lang)
 		return nil
 	})
 
