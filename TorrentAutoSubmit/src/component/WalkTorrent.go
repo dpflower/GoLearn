@@ -9,6 +9,9 @@ import (
 	"regexp"
 
 	"github.com/op/go-logging"
+	"encoding/json"
+	"bytes"
+	"net/http"
 )
 
 type Aria2Request struct {
@@ -32,6 +35,8 @@ var (
 	)
 )
 var pathSep = string(os.PathSeparator)
+//{"split":"5","max-connection-per-server":"5","seed-ratio":"1.0","seed-time":"0"}
+var options = Aria2Options{Split: "5", MaxConnectionPerServer: "5", SeedRatio: "1.0", SeedTime: "0"}
 
 func WalkTorrent(path string, url string) {
 	infos, err := ioutil.ReadDir(path)
@@ -59,17 +64,54 @@ func WalkTorrent(path string, url string) {
 	}
 }
 
-func submitTorrentFile(path string, info os.FileInfo, url string) error {
+func submitTorrentFile(path string, info os.FileInfo, urlString string) error {
 	content, err := readTorrentFile(path, info)
 	if err != nil {
 		logger.Error(err)
 		return err
 	}
 	logger.Info(content)
-	auth := RequestAuth(url)
+	auth := RequestAuth(urlString)
 	logger.Info(auth)
+	requestBody := MakeRequestBody(content)
+	logger.Info(requestBody)
+
+	reader := bytes.NewReader([]byte(requestBody))
+
+	req, err := http.NewRequest("POST", urlString, reader)
+	req.Header.Set("Content-Type", "application/json")
+	if len(auth) > 0 {
+		req.Header.Set("Authorization", auth)
+	}
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
+		panic(err)
+	}
+	defer resp.Body.Close()
+
+	body, _ := ioutil.ReadAll(resp.Body)
+
+	logger.Info(string(body))
 
 	return nil
+}
+
+func MakeRequestBody(content string) string {
+	params := make([]interface{}, 3)
+	params[0] = content
+	params[1] = make([]interface{}, 0)
+	params[2] = options
+	requestObj := Aria2Request{JsonRpc: "2.0", Method: "aria2.addTorrent", Id: 1, Params: params}
+	logger.Info(requestObj)
+	bytes, err := json.Marshal(requestObj)
+	if err != nil {
+		logger.Error(err)
+		return ""
+	}
+	jsonString := string(bytes)
+	logger.Info(jsonString)
+	return jsonString
 }
 
 func RequestAuth(url string) string {
@@ -84,8 +126,11 @@ func RequestAuth(url string) string {
 
 	submatch := reg.FindStringSubmatch(url)
 	logger.Info(submatch[1])
+	if len(submatch[1]) > 0 {
+		return "Basic " + base64.StdEncoding.EncodeToString([]byte(submatch[1]))
+	}
 
-	return submatch[1]
+	return ""
 }
 
 func readTorrentFile(path string, info os.FileInfo) (string, error) {
