@@ -25,6 +25,7 @@ var (
 
 	submit = app.Command("submit", "Download subtitle for specific file")
 	submitPath = submit.Arg("path", "target file path").Required().String()
+	httpUrl = submit.Flag("url", "Aria2 Url, default : http://dp:820425@192.168.2.222:6800/jsonrpc").Default("http://dp:820425@192.168.2.222:6800/jsonrpc").String()
 	logfile = submit.Flag("logfile", "LogFile Path defult ./log/TorrentSubmit.log.yyyyMMdd.txt").Default("").String()
 
 )
@@ -70,7 +71,7 @@ func main()  {
 	case submit.FullCommand():
 
 		logger.Info(fmt.Sprintf("开始遍历目录：%s，开始时间：%s", *submitPath, time.Now().Format("2006-01-02 15:04:05")))
-		component.WalkTorrent(*submitPath)
+		component.WalkTorrent(*submitPath, *httpUrl)
 		logger.Info("遍历完成！")
 	default:
 		kingpin.Usage()

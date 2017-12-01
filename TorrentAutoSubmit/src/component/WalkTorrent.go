@@ -70,11 +70,11 @@ func submitTorrentFile(path string, info os.FileInfo, urlString string) error {
 		logger.Error(err)
 		return err
 	}
-	logger.Info(content)
+	//logger.Info(content)
 	auth := RequestAuth(urlString)
-	logger.Info(auth)
+	//logger.Info(auth)
 	requestBody := MakeRequestBody(content)
-	logger.Info(requestBody)
+	//logger.Info(requestBody)
 
 	reader := bytes.NewReader([]byte(requestBody))
 
@@ -103,14 +103,14 @@ func MakeRequestBody(content string) string {
 	params[1] = make([]interface{}, 0)
 	params[2] = options
 	requestObj := Aria2Request{JsonRpc: "2.0", Method: "aria2.addTorrent", Id: 1, Params: params}
-	logger.Info(requestObj)
+	//logger.Info(requestObj)
 	bytes, err := json.Marshal(requestObj)
 	if err != nil {
 		logger.Error(err)
 		return ""
 	}
 	jsonString := string(bytes)
-	logger.Info(jsonString)
+	//logger.Info(jsonString)
 	return jsonString
 }
 
@@ -125,7 +125,7 @@ func RequestAuth(url string) string {
 	}
 
 	submatch := reg.FindStringSubmatch(url)
-	logger.Info(submatch[1])
+	//logger.Info(submatch[1])
 	if len(submatch[1]) > 0 {
 		return "Basic " + base64.StdEncoding.EncodeToString([]byte(submatch[1]))
 	}
