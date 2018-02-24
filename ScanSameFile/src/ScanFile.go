@@ -69,7 +69,7 @@ func main(){
 	case scan.FullCommand():
 
 		logger.Info(fmt.Sprintf("开始遍历目录：%s，开始时间：%s", *scanPath, time.Now().Format("2006-01-02 15:04:05")))
-		component.Comparison(*scanPath)
+		component.ConcurrentComparison(*scanPath)
 		logger.Info("遍历完成！")
 	default:
 		kingpin.Usage()
